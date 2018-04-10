@@ -1,0 +1,89 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+@*<img src="~/Content/login.png" />*@
+<input type="file" name="image" id="myfile">
+<a class="link" href=""></a>
+
+<img src="" id="target" height="" width="" />
+<input type="hidden" id="x" />
+<input type="hidden" id="y" />
+<input type="hidden" id="h" />
+<input type="hidden" id="w" />
+<input type="hidden" id="imgbase64" />
+<input type="button" value="crop" id="crop" />
+@section scripts
+{
+    <script language="Javascript">
+        jQuery(function ($) {
+            var jcrop_api;
+            function intiCrop() {
+                $('#target').Jcrop({
+                    onSelect: onSelect,
+                    onChange: onChange,
+                    bgColor: 'gray',
+                    bgOpacity: .6,
+                    setSelect: [0, 0, 100, 100],
+                    aspectRatio: 0
+                }, function () {
+                    jcrop_api = this;
+                });
+            }
+            intiCrop();
+            function onSelect(c) {
+                console.log("Selected x:" + c.x + " y:" + c.y + " x2:" + c.x2 + " y2:" + c.y2 + " w:" + c.w + " h:" + c.h);
+                $("#x").val(c.x);
+                $("#y").val(c.y);
+                $("#h").val(c.h);
+                $("#w").val(c.w);
+            }
+
+            function onChange(c) {
+                console.log("Movedx:" + c.x + " y:" + c.y + " x2:" + c.x2 + " y2:" + c.y2 + " w:" + c.w + " h:" + c.h);
+                $("#x").val(c.x);
+                $("#y").val(c.y);
+                $("#h").val(c.h);
+                $("#w").val(c.w);
+            }
+            $("#myfile").change(function () {
+                if (jcrop_api != undefined)
+                    jcrop_api.destroy();
+                encodeImagetoBase64(this);
+            });
+
+            $("#crop").click(function () {
+                //alert("Selected x:" + $("#x").val() + " y:" + $("#y").val() + " w:" + $("#w").val() + " h:" + $("#h").val());
+                $.ajax({
+                    type: "POST",
+                    url: "/Home/Crop",
+                    data: { "myimg": $("#imgbase64").val(), "x": $("#x").val(), "y": $("#y").val(), "height": $("#h").val(), "width": $("#w").val() },
+                    dataType: "json",
+                    success: function (data) {
+                        if (jcrop_api != undefined)
+                            jcrop_api.destroy();
+                        $("#target").attr("src", data)
+                        $("#target").height($("#h").val());
+                        $("#target").width($("#w").val());
+                        //alert(data);
+                    },
+                    error: function () {
+                        alert("Error occured!!")
+                    }
+                });
+            })
+
+            function encodeImagetoBase64(element) {
+                var file = element.files[0]; 
+                var reader = new FileReader();
+                reader.onloadend = function () {
+                    $("#imgbase64").val(reader.result);
+                    $("#target").attr("src", reader.result);
+                    //document.getElementById('target').setAttribute('src', reader.result);
+                    intiCrop();
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+}
