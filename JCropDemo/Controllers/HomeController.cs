@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace JCropDemo.Controllers
@@ -39,8 +36,8 @@ namespace JCropDemo.Controllers
             MemoryStream ms = new MemoryStream();
             target.Save(ms, GetImageFormat(basestring));
             byte[] byteImage = ms.ToArray();
-            var SigBase64 = Convert.ToBase64String(byteImage); //Get Base64
-            return Json(basestring + SigBase64, JsonRequestBehavior.AllowGet);
+            var base64 = Convert.ToBase64String(byteImage); //Get Base64
+            return Json(basestring + base64, JsonRequestBehavior.AllowGet);
         }
         ImageFormat GetImageFormat(string base64ref)
         {
